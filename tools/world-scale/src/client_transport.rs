@@ -1,7 +1,14 @@
-use crate::{ClientMessage, ClientView, Command, ServerMessage, StableId, PROTOCOL_VERSION};
+use crate::{
+    validate_server_message, ClientMessage, ClientView, Command, ServerMessage, StableId,
+    PROTOCOL_VERSION,
+};
 use bevy::prelude::*;
 
 fn apply_message(view: &mut ClientView, message: ServerMessage) {
+    if let Err(error) = validate_server_message(&message) {
+        error!("rejected server message: {error}");
+        return;
+    }
     match message {
         ServerMessage::Welcome { snapshot, .. } | ServerMessage::Snapshot { snapshot, .. } => {
             info!(
@@ -35,13 +42,21 @@ mod native {
     pub struct NativeTransport {
         outgoing: Sender<ClientMessage>,
         incoming: Mutex<Receiver<ServerMessage>>,
+        session_id: u64,
     }
 
     pub fn connect_native(mut commands: Commands) {
-        let url = std::env::args()
-            .skip_while(|arg| arg != "--server")
-            .nth(1)
-            .unwrap_or_else(|| "ws://127.0.0.1:4200".into());
+        let args = std::env::args().skip(1).collect::<Vec<_>>();
+        let value = |flag: &str| {
+            args.iter()
+                .position(|arg| arg == flag)
+                .and_then(|index| args.get(index + 1))
+                .cloned()
+        };
+        let url = value("--server").unwrap_or_else(|| "ws://127.0.0.1:4200".into());
+        let session_id = value("--session")
+            .and_then(|value| value.parse::<u64>().ok())
+            .unwrap_or(1);
         let (outgoing, commands_rx) = mpsc::channel::<ClientMessage>();
         let (messages_tx, incoming) = mpsc::channel::<ServerMessage>();
         thread::spawn(move || {
@@ -51,7 +66,7 @@ mod native {
             }
             socket
                 .send(Message::Text(
-                    serde_json::to_string(&ClientMessage::hello(1, vec![0, 1]))
+                    serde_json::to_string(&ClientMessage::hello(session_id, vec![0, 1]))
                         .unwrap()
                         .into(),
                 ))
@@ -89,6 +104,7 @@ mod native {
         commands.insert_resource(NativeTransport {
             outgoing,
             incoming: Mutex::new(incoming),
+            session_id,
         });
     }
 
@@ -106,7 +122,7 @@ mod native {
         let message = if keys.just_pressed(KeyCode::Space) {
             Some(ClientMessage::Command {
                 version: PROTOCOL_VERSION,
-                command: Command::push(1, 1, view.last_tick + 1, StableId(100)),
+                command: Command::push(transport.session_id, 1, view.last_tick + 1, StableId(100)),
             })
         } else if keys.just_pressed(KeyCode::KeyU) {
             Some(ClientMessage::Subscribe {

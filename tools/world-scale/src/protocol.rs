@@ -1,4 +1,6 @@
-use crate::{AcceptedCommand, CellId, CellManifest, Command, CrateState, PedestrianState};
+use crate::{
+    AcceptedCommand, CellId, CellManifest, Command, CrateState, PedestrianState, SCHEMA_VERSION,
+};
 use serde::{Deserialize, Serialize};
 
 pub const PROTOCOL_VERSION: u32 = 1;
@@ -53,6 +55,29 @@ pub enum ServerMessage {
     },
 }
 
+pub fn validate_server_message(message: &ServerMessage) -> Result<(), String> {
+    let version = match message {
+        ServerMessage::Welcome { version, .. }
+        | ServerMessage::Ack { version, .. }
+        | ServerMessage::Snapshot { version, .. }
+        | ServerMessage::Error { version, .. } => *version,
+    };
+    if version != PROTOCOL_VERSION {
+        return Err(format!(
+            "unsupported server protocol version {version} (expected {PROTOCOL_VERSION})"
+        ));
+    }
+    if let ServerMessage::Welcome { manifest, .. } = message {
+        if manifest.version != SCHEMA_VERSION {
+            return Err(format!(
+                "unsupported manifest version {} (expected {SCHEMA_VERSION})",
+                manifest.version
+            ));
+        }
+    }
+    Ok(())
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ViewSnapshot {
     pub tick: u64,
@@ -69,11 +94,36 @@ pub enum ProtocolError {
 
 #[cfg(test)]
 mod tests {
-    use super::{ClientMessage, PROTOCOL_VERSION};
+    use super::{validate_server_message, ClientMessage, ServerMessage, PROTOCOL_VERSION};
+    use crate::{Fixture, ServerCore, SCHEMA_VERSION};
 
     #[test]
     fn protocol_version_is_explicit_in_hello() {
         let json = serde_json::to_string(&ClientMessage::hello(9, vec![0, 1])).unwrap();
         assert!(json.contains(&format!("\"version\":{PROTOCOL_VERSION}")));
+    }
+
+    #[test]
+    fn client_rejects_server_and_manifest_version_mismatch() {
+        let path = std::env::temp_dir().join("bevy-world-scale-protocol-version");
+        let server = ServerCore::fresh(&path, Fixture::intersection(42)).unwrap();
+        let mut manifest = server.fixture().manifest.clone();
+        manifest.version = SCHEMA_VERSION + 1;
+        let message = ServerMessage::Welcome {
+            version: PROTOCOL_VERSION,
+            manifest,
+            snapshot: server.snapshot(&server.fixture().cells, true),
+        };
+        assert!(validate_server_message(&message)
+            .unwrap_err()
+            .contains("manifest version"));
+
+        let message = ServerMessage::Error {
+            version: PROTOCOL_VERSION + 1,
+            message: "x".into(),
+        };
+        assert!(validate_server_message(&message)
+            .unwrap_err()
+            .contains("server protocol version"));
     }
 }

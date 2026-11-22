@@ -4,7 +4,7 @@ Date: 2026-11-21 (America/Los_Angeles)
 
 ## Automated results
 
-- `cargo test -p bevy_world_scale --features client`: 10 passed, 0 failed.
+- `cargo test -p bevy_world_scale --features client`: 11 passed, 0 failed.
 - Native client check and build: passed after selecting X11-only client platform features; the broader Bevy `2d` feature could not build because this image lacks `wayland-client.pc`.
 - `cargo build -p bevy_world_scale --features client --bin world_scale_client --target wasm32-unknown-unknown`: passed.
 - Clean replay: matched all 30 ticks.

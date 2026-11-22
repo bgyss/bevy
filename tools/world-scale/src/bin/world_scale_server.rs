@@ -11,7 +11,7 @@ use std::{
     path::PathBuf,
     sync::{
         atomic::{AtomicU64, Ordering},
-        mpsc::{self, Receiver, Sender},
+        mpsc::{self, Receiver, Sender, SyncSender, TrySendError},
         Mutex,
     },
     thread,
@@ -22,7 +22,7 @@ use tungstenite::{accept, Error as WebSocketError, Message};
 struct Inbound {
     client_id: u64,
     message: ClientMessage,
-    outbound: Sender<ServerMessage>,
+    outbound: SyncSender<ServerMessage>,
 }
 
 #[derive(Resource)]
@@ -31,7 +31,7 @@ struct Inbox(Mutex<Receiver<Inbound>>);
 #[derive(Resource)]
 struct Authority {
     core: Mutex<ServerCore>,
-    clients: Mutex<BTreeMap<u64, (Vec<CellId>, Sender<ServerMessage>)>>,
+    clients: Mutex<BTreeMap<u64, (Vec<CellId>, SyncSender<ServerMessage>)>>,
 }
 
 fn main() {
@@ -94,7 +94,7 @@ fn serve_client(client_id: u64, stream: TcpStream, sender: Sender<Inbound>) {
         .get_mut()
         .set_nonblocking(true)
         .expect("nonblocking socket");
-    let (outbound, responses) = mpsc::channel();
+    let (outbound, responses) = mpsc::sync_channel(8);
     loop {
         match socket.read() {
             Ok(Message::Text(text)) => match serde_json::from_str(&text) {
@@ -141,7 +141,7 @@ fn authoritative_tick(inbox: Res<Inbox>, authority: Res<Authority>) {
         let receiver = inbox.0.lock().expect("inbox lock");
         receiver.try_iter().collect::<Vec<_>>()
     };
-    let mut commands: Vec<(u64, Command, Sender<ServerMessage>)> = Vec::new();
+    let mut commands: Vec<(u64, Command, SyncSender<ServerMessage>)> = Vec::new();
     let mut core = authority.core.lock().expect("authority lock");
     let mut clients = authority.clients.lock().expect("clients lock");
     for inbound in messages {
@@ -196,10 +196,13 @@ fn authoritative_tick(inbox: Res<Inbox>, authority: Res<Authority>) {
             });
         }
     }
-    for (cells, outbound) in clients.values() {
-        let _ = outbound.send(ServerMessage::Snapshot {
+    clients.retain(|_, (cells, outbound)| {
+        match outbound.try_send(ServerMessage::Snapshot {
             version: PROTOCOL_VERSION,
             snapshot: core.snapshot(cells, false),
-        });
-    }
+        }) {
+            Ok(()) | Err(TrySendError::Full(_)) => true,
+            Err(TrySendError::Disconnected(_)) => false,
+        }
+    });
 }

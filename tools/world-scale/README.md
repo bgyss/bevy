@@ -27,10 +27,10 @@ The server uses `ScheduleRunnerPlugin` and `FixedUpdate` at 30 Hz. It binds the 
 
 ```sh
 cargo run -p bevy_world_scale --features client --bin world_scale_client -- \
-  --server ws://127.0.0.1:4200
+  --server ws://127.0.0.1:4200 --session 1
 ```
 
-Start a second copy with the same command. Each receives the same complete manifest and authoritative snapshots.
+Start a second copy with `--session 2`. Each receives the same complete manifest and authoritative snapshots.
 
 ## Browser client
 
