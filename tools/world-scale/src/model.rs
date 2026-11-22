@@ -11,7 +11,12 @@ pub struct StableId(pub u64);
 pub struct CellId(pub i32);
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub enum ObjectKind { Crate, Pedestrian, Crossing, PlayerSpawn }
+pub enum ObjectKind {
+    Crate,
+    Pedestrian,
+    Crossing,
+    PlayerSpawn,
+}
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ObjectRecord {
@@ -30,7 +35,10 @@ pub struct CellManifest {
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub enum Route { Direct, Detour }
+pub enum Route {
+    Direct,
+    Detour,
+}
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct CrateState {
@@ -63,7 +71,9 @@ pub struct AcceptedCommand {
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub enum CommandKind { Push { impulse_mm: [i32; 2] } }
+pub enum CommandKind {
+    Push { impulse_mm: [i32; 2] },
+}
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Command {
@@ -76,7 +86,15 @@ pub struct Command {
 
 impl Command {
     pub fn push(session_id: u64, sequence: u64, tick: u64, target: StableId) -> Self {
-        Self { session_id, sequence, tick, target, kind: CommandKind::Push { impulse_mm: [1_000, 0] } }
+        Self {
+            session_id,
+            sequence,
+            tick,
+            target,
+            kind: CommandKind::Push {
+                impulse_mm: [1_000, 0],
+            },
+        }
     }
 }
 

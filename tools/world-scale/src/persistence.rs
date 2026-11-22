@@ -18,13 +18,19 @@ impl DurableStore {
         if !checkpoint.exists() {
             write_checkpoint(&directory, &initial)?;
         }
-        let journal = OpenOptions::new().create(true).append(true).open(directory.join("journal.jsonl"))?;
+        let journal = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(directory.join("journal.jsonl"))?;
         Ok(Self { directory, journal })
     }
 
     pub fn commit_tick(&mut self, record: TickRecord, state: &WorldState) -> io::Result<()> {
         if record.tick != state.tick {
-            return Err(io::Error::new(io::ErrorKind::InvalidInput, "tick record and state disagree"));
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "tick record and state disagree",
+            ));
         }
         serde_json::to_writer(&mut self.journal, state).map_err(io::Error::other)?;
         self.journal.write_all(b"\n")?;
@@ -34,23 +40,35 @@ impl DurableStore {
 
     pub fn checkpoint(&mut self, state: &WorldState) -> io::Result<()> {
         write_checkpoint(&self.directory, state)?;
-        self.journal = OpenOptions::new().create(true).write(true).truncate(true).open(self.directory.join("journal.jsonl"))?;
+        self.journal = OpenOptions::new()
+            .create(true)
+            .write(true)
+            .truncate(true)
+            .open(self.directory.join("journal.jsonl"))?;
         self.journal.sync_data()
     }
 
     pub fn recover(path: impl AsRef<Path>) -> io::Result<WorldState> {
         let directory = path.as_ref();
         let checkpoint = File::open(directory.join("checkpoint.json"))?;
-        let mut state: WorldState = serde_json::from_reader(checkpoint).map_err(io::Error::other)?;
+        let mut state: WorldState =
+            serde_json::from_reader(checkpoint).map_err(io::Error::other)?;
         if state.version != SCHEMA_VERSION {
-            return Err(io::Error::new(io::ErrorKind::InvalidData, format!("unsupported checkpoint version {}", state.version)));
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("unsupported checkpoint version {}", state.version),
+            ));
         }
         let journal_path = directory.join("journal.jsonl");
         if let Ok(journal) = File::open(journal_path) {
             for line in BufReader::new(journal).lines() {
                 let line = line?;
                 match serde_json::from_str::<WorldState>(&line) {
-                    Ok(candidate) if candidate.version == SCHEMA_VERSION && candidate.tick > state.tick => state = candidate,
+                    Ok(candidate)
+                        if candidate.version == SCHEMA_VERSION && candidate.tick > state.tick =>
+                    {
+                        state = candidate
+                    }
                     Ok(_) => {}
                     Err(_) => break,
                 }
@@ -74,10 +92,18 @@ fn write_checkpoint(directory: &Path, state: &WorldState) -> io::Result<()> {
 mod tests {
     use super::DurableStore;
     use crate::{Command, Fixture, Simulation, StableId};
-    use std::{fs::OpenOptions, io::Write, path::PathBuf, time::{SystemTime, UNIX_EPOCH}};
+    use std::{
+        fs::OpenOptions,
+        io::Write,
+        path::PathBuf,
+        time::{SystemTime, UNIX_EPOCH},
+    };
 
     fn state_dir(name: &str) -> PathBuf {
-        let nonce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
         std::env::temp_dir().join(format!("bevy-world-scale-{name}-{nonce}"))
     }
 
@@ -86,9 +112,15 @@ mod tests {
         let path = state_dir("recover");
         let mut simulation = Simulation::from_fixture(Fixture::intersection(42));
         let mut store = DurableStore::open(&path, simulation.state().clone()).unwrap();
-        for _ in 0..4 { store.commit_tick(simulation.tick(&[]), simulation.state()).unwrap(); }
+        for _ in 0..4 {
+            store
+                .commit_tick(simulation.tick(&[]), simulation.state())
+                .unwrap();
+        }
         let push = Command::push(7, 1, 5, StableId(100));
-        store.commit_tick(simulation.tick(&[push.clone()]), simulation.state()).unwrap();
+        store
+            .commit_tick(simulation.tick(&[push.clone()]), simulation.state())
+            .unwrap();
         drop(store);
 
         let recovered = DurableStore::recover(&path).unwrap();
@@ -107,9 +139,16 @@ mod tests {
         let path = state_dir("tail");
         let mut simulation = Simulation::from_fixture(Fixture::intersection(42));
         let mut store = DurableStore::open(&path, simulation.state().clone()).unwrap();
-        store.commit_tick(simulation.tick(&[]), simulation.state()).unwrap();
+        store
+            .commit_tick(simulation.tick(&[]), simulation.state())
+            .unwrap();
         drop(store);
-        OpenOptions::new().append(true).open(path.join("journal.jsonl")).unwrap().write_all(b"{partial").unwrap();
+        OpenOptions::new()
+            .append(true)
+            .open(path.join("journal.jsonl"))
+            .unwrap()
+            .write_all(b"{partial")
+            .unwrap();
 
         let recovered = DurableStore::recover(&path).unwrap();
         assert_eq!(recovered.tick, 1);

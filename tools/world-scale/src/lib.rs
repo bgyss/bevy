@@ -1,31 +1,31 @@
 //! Fork-local deterministic world-scale intersection experiment.
 #![allow(missing_docs)]
 
+mod client_state;
+#[cfg(feature = "client")]
+mod client_transport;
 mod fixture;
 mod model;
 mod persistence;
+#[cfg(feature = "client")]
+mod presentation;
 mod protocol;
 mod replay;
 mod server;
 mod simulation;
-mod client_state;
-#[cfg(feature = "client")]
-mod client_transport;
-#[cfg(feature = "client")]
-mod presentation;
 
+pub use client_state::*;
+#[cfg(feature = "client")]
+pub use client_transport::*;
 pub use fixture::*;
 pub use model::*;
 pub use persistence::*;
+#[cfg(feature = "client")]
+pub use presentation::*;
 pub use protocol::*;
 pub use replay::*;
 pub use server::*;
 pub use simulation::*;
-pub use client_state::*;
-#[cfg(feature = "client")]
-pub use client_transport::*;
-#[cfg(feature = "client")]
-pub use presentation::*;
 
 #[cfg(test)]
 mod tests {

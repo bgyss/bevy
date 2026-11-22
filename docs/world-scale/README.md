@@ -32,3 +32,5 @@ Milestones 2 and 3 can share the intersection fixture. Lighting and groom work c
 | How should we collect traces and build browser controls? | [Profiling guide](../profiling.md), [WASM example instructions](../../examples/README.md#webgl2-and-webgpu), [benchmark protocol](benchmarks.md) |
 
 The first implementation ticket ends with a recorded replay, a server checkpoint and two client event traces for the intersection. The following ticket changes one variable, such as sleep policy, against that recording. All thresholds here are proposed decision criteria. No performance or parity result has been measured.
+
+The first runnable milestone now lives in [`tools/world-scale`](../../tools/world-scale/README.md), including exact server/client/replay commands and the recorded execution evidence.
