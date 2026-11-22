@@ -4,14 +4,20 @@
 mod fixture;
 mod model;
 mod persistence;
+mod protocol;
 mod replay;
+mod server;
 mod simulation;
+mod client_state;
 
 pub use fixture::*;
 pub use model::*;
 pub use persistence::*;
+pub use protocol::*;
 pub use replay::*;
+pub use server::*;
 pub use simulation::*;
+pub use client_state::*;
 
 #[cfg(test)]
 mod tests {
