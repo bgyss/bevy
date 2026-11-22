@@ -1,6 +1,6 @@
 use crate::{CellId, CrateState, PedestrianState, StableId, ViewSnapshot};
+use alloc::collections::BTreeMap;
 use bevy::prelude::Resource;
-use std::collections::BTreeMap;
 
 #[derive(Clone, Debug)]
 pub enum ViewObject {

@@ -2,7 +2,7 @@ use crate::{
     CellId, CellManifest, CrateState, ObjectKind, ObjectRecord, PedestrianState, Route, StableId,
     WorldState, SCHEMA_VERSION,
 };
-use std::collections::BTreeMap;
+use alloc::collections::BTreeMap;
 
 #[derive(Clone, Debug)]
 pub struct Fixture {

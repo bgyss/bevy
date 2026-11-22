@@ -1,6 +1,6 @@
 use crate::{Command, Fixture, Simulation, StableId, TickRecord, SCHEMA_VERSION};
+use core::{error::Error, fmt};
 use serde::{Deserialize, Serialize};
-use std::{error::Error, fmt};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Replay {

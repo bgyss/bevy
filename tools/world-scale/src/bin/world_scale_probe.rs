@@ -1,5 +1,11 @@
 //! Scriptable native WebSocket observer for recovery verification.
 
+#![allow(
+    clippy::print_stdout,
+    clippy::print_stderr,
+    reason = "Scripted probes report results through process output"
+)]
+
 use bevy_world_scale::{
     CellId, ClientMessage, Command, Route, ServerMessage, StableId, ViewSnapshot, PROTOCOL_VERSION,
 };

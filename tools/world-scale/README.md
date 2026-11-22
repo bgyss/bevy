@@ -65,4 +65,3 @@ bash tools/world-scale/scripts/run_recovery_scenario.sh
 ```
 
 The scenario starts two native WebSocket observers, duplicates the push, disconnects player A before its acknowledgment, retries after reconnect, unloads/reloads a cell, restarts the server, and late-joins player C. It asserts crate position `[1000, 0]`, crate revision `1`, a single accepted push, and pedestrian route `Detour` after every recovery boundary.
-

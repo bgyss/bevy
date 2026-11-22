@@ -1,5 +1,10 @@
 //! Fork-local deterministic world-scale intersection experiment.
-#![allow(missing_docs)]
+#![allow(
+    missing_docs,
+    reason = "Fork-local experiment without a public API contract"
+)]
+
+extern crate alloc;
 
 mod client_state;
 #[cfg(feature = "client")]

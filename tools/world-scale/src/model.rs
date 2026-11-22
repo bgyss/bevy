@@ -1,6 +1,6 @@
+use alloc::collections::BTreeMap;
 use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
 
 pub const SCHEMA_VERSION: u32 = 1;
 

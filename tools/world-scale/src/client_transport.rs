@@ -88,13 +88,12 @@ mod native {
                             let _ = messages_tx.send(message);
                         }
                     }
-                    Ok(Message::Close(_)) => return,
+                    Ok(Message::Close(_)) | Err(WebSocketError::ConnectionClosed) => return,
                     Ok(_) => {}
                     Err(WebSocketError::Io(error))
                         if error.kind() == std::io::ErrorKind::WouldBlock => {}
-                    Err(WebSocketError::ConnectionClosed) => return,
                     Err(error) => {
-                        eprintln!("client WebSocket failed: {error}");
+                        bevy::log::warn!("client WebSocket failed: {error}");
                         return;
                     }
                 }
@@ -149,7 +148,8 @@ pub use native::*;
 #[cfg(target_arch = "wasm32")]
 mod browser {
     use super::*;
-    use std::{cell::RefCell, rc::Rc};
+    use alloc::rc::Rc;
+    use core::cell::RefCell;
     use wasm_bindgen::{closure::Closure, JsCast};
     use web_sys::{MessageEvent, WebSocket};
 

@@ -33,6 +33,7 @@
 ### Task 1: Deterministic fixture, simulation, replay, and comparator
 
 **Files:**
+
 - Create: `tools/world-scale/Cargo.toml`
 - Create: `tools/world-scale/src/lib.rs`
 - Create: `tools/world-scale/src/model.rs`
@@ -43,6 +44,7 @@
 - Create: `tools/world-scale/replays/v1/intersection.json`
 
 **Interfaces:**
+
 - Produces: `WorldScalePlugin`, `Fixture::intersection(seed: u64)`, `Simulation::tick(&[Command]) -> TickRecord`, `run_replay`, and `compare_runs`.
 
 - [ ] Write failing unit tests for stable fixture IDs, one accepted push, duplicate delivery, detour activation, settling, comparator field diagnostics, version mismatch, and the deliberate duplicate-acceptance fault.
@@ -54,11 +56,13 @@
 ### Task 2: Durable checkpoint, journal, and crash recovery
 
 **Files:**
+
 - Create: `tools/world-scale/src/persistence.rs`
 - Modify: `tools/world-scale/src/simulation.rs`
 - Modify: `tools/world-scale/src/replay.rs`
 
 **Interfaces:**
+
 - Consumes: versioned `WorldState`, `AcceptedCommand`, and `TickRecord` from Task 1.
 - Produces: `DurableStore::open`, `commit_tick`, `checkpoint`, and `recover`.
 
@@ -71,12 +75,14 @@
 ### Task 3: Authoritative server and client protocol
 
 **Files:**
+
 - Create: `tools/world-scale/src/protocol.rs`
 - Create: `tools/world-scale/src/server.rs`
 - Create: `tools/world-scale/src/bin/world_scale_server.rs`
 - Create: `tools/world-scale/src/client_state.rs`
 
 **Interfaces:**
+
 - Consumes: simulation and durable store from Tasks 1-2.
 - Produces: versioned `ClientMessage`/`ServerMessage`, WebSocket server, subscriptions, complete interest snapshots, and reconnect tokens.
 
@@ -89,6 +95,7 @@
 ### Task 4: Procedural native and WASM clients
 
 **Files:**
+
 - Create: `tools/world-scale/src/presentation.rs`
 - Create: `tools/world-scale/src/client_transport.rs`
 - Create: `tools/world-scale/src/bin/world_scale_client.rs`
@@ -96,6 +103,7 @@
 - Create: `tools/world-scale/web/serve.py`
 
 **Interfaces:**
+
 - Consumes: protocol messages and client stable-ID view state from Task 3.
 - Produces: native/WASM client entry point, procedural two-cell intersection rendering, keyboard push/subscription controls, and structured client event traces.
 
@@ -109,12 +117,14 @@
 ### Task 5: End-to-end scenario, commands, and evidence
 
 **Files:**
+
 - Create: `tools/world-scale/scripts/run_recovery_scenario.sh`
 - Create: `tools/world-scale/README.md`
 - Create: `tools/world-scale/evidence/run-record.md`
 - Modify: `docs/world-scale/README.md`
 
 **Interfaces:**
+
 - Consumes: all binaries and schemas from Tasks 1-4.
 - Produces: exact operator commands, reproducible scenario automation, traces, and an honest execution record.
 

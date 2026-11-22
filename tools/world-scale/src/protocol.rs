@@ -67,13 +67,13 @@ pub fn validate_server_message(message: &ServerMessage) -> Result<(), String> {
             "unsupported server protocol version {version} (expected {PROTOCOL_VERSION})"
         ));
     }
-    if let ServerMessage::Welcome { manifest, .. } = message {
-        if manifest.version != SCHEMA_VERSION {
-            return Err(format!(
-                "unsupported manifest version {} (expected {SCHEMA_VERSION})",
-                manifest.version
-            ));
-        }
+    if let ServerMessage::Welcome { manifest, .. } = message
+        && manifest.version != SCHEMA_VERSION
+    {
+        return Err(format!(
+            "unsupported manifest version {} (expected {SCHEMA_VERSION})",
+            manifest.version
+        ));
     }
     Ok(())
 }

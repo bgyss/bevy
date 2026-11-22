@@ -1,11 +1,19 @@
 //! Headless 30 Hz authoritative world-scale server.
 
+#![allow(
+    clippy::print_stdout,
+    clippy::print_stderr,
+    reason = "The headless server reports startup and transport diagnostics through process output"
+)]
+
+extern crate alloc;
+
+use alloc::collections::BTreeMap;
 use bevy::{app::ScheduleRunnerPlugin, prelude::*};
 use bevy_world_scale::{
     CellId, ClientMessage, Command, Fixture, ServerCore, ServerMessage, PROTOCOL_VERSION,
 };
 use std::{
-    collections::BTreeMap,
     env,
     net::{TcpListener, TcpStream},
     path::PathBuf,
@@ -117,10 +125,9 @@ fn serve_client(client_id: u64, stream: TcpStream, sender: Sender<Inbound>) {
                     });
                 }
             },
-            Ok(Message::Close(_)) => return,
+            Ok(Message::Close(_)) | Err(WebSocketError::ConnectionClosed) => return,
             Ok(_) => {}
             Err(WebSocketError::Io(error)) if error.kind() == std::io::ErrorKind::WouldBlock => {}
-            Err(WebSocketError::ConnectionClosed) => return,
             Err(error) => {
                 eprintln!("client {client_id} read failed: {error}");
                 return;

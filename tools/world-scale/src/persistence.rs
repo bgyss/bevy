@@ -67,7 +67,7 @@ impl DurableStore {
                     Ok(candidate)
                         if candidate.version == SCHEMA_VERSION && candidate.tick > state.tick =>
                     {
-                        state = candidate
+                        state = candidate;
                     }
                     Ok(_) => {}
                     Err(_) => break,
@@ -119,7 +119,10 @@ mod tests {
         }
         let push = Command::push(7, 1, 5, StableId(100));
         store
-            .commit_tick(simulation.tick(&[push.clone()]), simulation.state())
+            .commit_tick(
+                simulation.tick(core::slice::from_ref(&push)),
+                simulation.state(),
+            )
             .unwrap();
         drop(store);
 

@@ -1,5 +1,11 @@
 //! Runs and compares versioned world-scale replays.
 
+#![allow(
+    clippy::print_stdout,
+    clippy::print_stderr,
+    reason = "The replay CLI reports comparisons through process output"
+)]
+
 use bevy_world_scale::{compare_runs, run_replay, Replay};
 use std::{env, fs, process::ExitCode};
 
