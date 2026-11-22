@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "fixture_seed": 42,
+  "end_tick": 30,
+  "commands": [
+    {
+      "session_id": 7,
+      "sequence": 1,
+      "tick": 5,
+      "target": 100,
+      "kind": { "Push": { "impulse_mm": [1000, 0] } }
+    },
+    {
+      "session_id": 7,
+      "sequence": 1,
+      "tick": 5,
+      "target": 100,
+      "kind": { "Push": { "impulse_mm": [1000, 0] } }
+    }
+  ]
+}
