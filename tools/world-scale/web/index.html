@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Bevy world-scale intersection</title></head>
+<body style="margin:0;background:#111;color:#fff;font:16px sans-serif">
+<div id="status" style="position:fixed;z-index:10;padding:12px;background:#000b">loading Bevy WASM…</div>
+<script type="module">
+import init from './world_scale_client.js';
+init().then(() => document.querySelector('#status').textContent = 'WASM initialized — connecting…')
+      .catch(error => document.querySelector('#status').textContent = `WASM failed: ${error}`);
+</script></body>
+</html>

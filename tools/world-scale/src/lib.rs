@@ -9,6 +9,10 @@ mod replay;
 mod server;
 mod simulation;
 mod client_state;
+#[cfg(feature = "client")]
+mod client_transport;
+#[cfg(feature = "client")]
+mod presentation;
 
 pub use fixture::*;
 pub use model::*;
@@ -18,6 +22,10 @@ pub use replay::*;
 pub use server::*;
 pub use simulation::*;
 pub use client_state::*;
+#[cfg(feature = "client")]
+pub use client_transport::*;
+#[cfg(feature = "client")]
+pub use presentation::*;
 
 #[cfg(test)]
 mod tests {

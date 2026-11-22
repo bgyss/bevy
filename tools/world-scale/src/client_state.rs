@@ -1,3 +1,4 @@
+use bevy::prelude::Resource;
 use crate::{CellId, CrateState, PedestrianState, StableId, ViewSnapshot};
 use std::collections::BTreeMap;
 
@@ -8,7 +9,7 @@ impl ViewObject {
     fn cell(&self) -> CellId { match self { Self::Crate(state) => state.cell, Self::Pedestrian(state) => state.cell } }
 }
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct ClientView { objects: BTreeMap<StableId, ViewObject>, pub last_tick: u64 }
 
 impl ClientView {
@@ -22,6 +23,7 @@ impl ClientView {
     }
     pub fn unload(&mut self, cell: CellId) { self.objects.retain(|_, object| object.cell() != cell); }
     pub fn objects(&self) -> &BTreeMap<StableId, ViewObject> { &self.objects }
+    pub fn object(&self, id: StableId) -> Option<&ViewObject> { self.objects.get(&id) }
 }
 
 #[cfg(test)]
