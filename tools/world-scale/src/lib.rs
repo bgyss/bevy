@@ -3,11 +3,13 @@
 
 mod fixture;
 mod model;
+mod persistence;
 mod replay;
 mod simulation;
 
 pub use fixture::*;
 pub use model::*;
+pub use persistence::*;
 pub use replay::*;
 pub use simulation::*;
 

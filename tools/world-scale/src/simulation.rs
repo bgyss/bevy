@@ -18,7 +18,7 @@ impl Simulation {
         let mut ordered = commands.to_vec();
         ordered.sort_by_key(|command| (command.tick, command.session_id, command.sequence));
         for command in ordered.into_iter().filter(|command| command.tick <= tick) {
-            let key = (command.session_id, command.sequence);
+            let key = format!("{}:{}", command.session_id, command.sequence);
             if !self.accept_duplicates && self.state.accepted_commands.contains_key(&key) { continue; }
             if command.target != self.state.crate_state.stable_id { continue; }
             let CommandKind::Push { impulse_mm } = command.kind;

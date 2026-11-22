@@ -86,7 +86,7 @@ pub struct WorldState {
     pub tick: u64,
     pub crate_state: CrateState,
     pub pedestrian: PedestrianState,
-    pub accepted_commands: BTreeMap<(u64, u64), AcceptedCommand>,
+    pub accepted_commands: BTreeMap<String, AcceptedCommand>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
