@@ -169,7 +169,7 @@ fn authoritative_tick(inbox: Res<Inbox>, authority: Res<Authority>) {
                 });
             }
             ClientMessage::Command { version, command } if version == PROTOCOL_VERSION => {
-                commands.push((inbound.client_id, command, inbound.outbound))
+                commands.push((inbound.client_id, command, inbound.outbound));
             }
             ClientMessage::Subscribe { version, cells } if version == PROTOCOL_VERSION => {
                 clients.insert(inbound.client_id, (cells.clone(), inbound.outbound.clone()));
